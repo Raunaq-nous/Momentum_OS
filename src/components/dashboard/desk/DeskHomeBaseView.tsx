@@ -39,9 +39,8 @@ export const DeskHomeBaseView: React.FC<DeskHomeBaseViewProps> = ({
     internships,
     risks,
     habits,
-    toggleHabitCheckIn,
     profile,
-    addXP,
+    awardXP,
     settings,
     focusTimer,
     startFocusTimer,
@@ -171,9 +170,9 @@ export const DeskHomeBaseView: React.FC<DeskHomeBaseViewProps> = ({
 
   // Habit Knitting Calculations
   const todayIso = new Date().toISOString().split('T')[0];
-  const habitsCompletedToday = habits.filter((h) => h.completedDates?.includes(todayIso) || (h as any).lastCompletedDate === todayIso).length;
+  const habitsCompletedToday = habits.filter((h) => h.completionHistory?.[todayIso] === 'completed').length;
   const totalHabitsCount = habits.length;
-  const totalHabitCheckins = habits.reduce((acc, h) => acc + (h.streak || h.completedDates?.length || 0), 0);
+  const totalHabitCheckins = habits.reduce((acc, h) => acc + h.currentStreak, 0);
 
   // Active interview / internship for corkboard
   const activeInterview = internships.find((i) => i.status === 'interview') || internships[0];
@@ -743,7 +742,7 @@ export const DeskHomeBaseView: React.FC<DeskHomeBaseViewProps> = ({
                         const newStatus = t.status === 'completed' ? 'today' : 'completed';
                         updateTask(t.id, { status: newStatus });
                         if (newStatus === 'completed') {
-                          addXP(10, 'Completed task on notepad');
+                          awardXP(10);
                           showToast('Done! +10 XP');
                           try {
                             playSound('complete');

@@ -64,7 +64,7 @@ export const DeskModuleRoom: React.FC<DeskModuleRoomProps> = ({
     deleteTask,
     habits,
     addHabit,
-    toggleHabitCheckIn,
+    logHabitCompletion,
     notes,
     addNote,
     deleteNote,
@@ -73,7 +73,7 @@ export const DeskModuleRoom: React.FC<DeskModuleRoomProps> = ({
     projects,
     updateProject,
     profile,
-    addXP,
+    awardXP,
     focusTimer,
     startFocusTimer,
     pauseFocusTimer,
@@ -122,7 +122,7 @@ export const DeskModuleRoom: React.FC<DeskModuleRoomProps> = ({
   const todayIso = new Date().toISOString().split('T')[0];
 
   // Habits scarf calculation
-  const totalHabitRows = habits.reduce((acc, h) => acc + (h.streak || h.completedDates?.length || 1), 0);
+  const totalHabitRows = habits.reduce((acc, h) => acc + (h.currentStreak || 1), 0);
 
   return (
     <div id="moduleRoom" className="desk-room">
@@ -241,7 +241,7 @@ export const DeskModuleRoom: React.FC<DeskModuleRoomProps> = ({
                                 const nextStatus = isDone ? 'today' : 'completed';
                                 updateTask(task.id, { status: nextStatus });
                                 if (nextStatus === 'completed') {
-                                  addXP(10, 'Completed task');
+                                  awardXP(10);
                                   onToast('Done! +10 XP');
                                 }
                               }}
@@ -341,10 +341,9 @@ export const DeskModuleRoom: React.FC<DeskModuleRoomProps> = ({
                           frequency: 'daily',
                           targetDaysPerWeek: 7,
                           category: 'Health',
-                          completedDates: [],
                         });
                         setQuickHabitInput('');
-                        addXP(10, 'Created new habit');
+                        awardXP(10);
                         onToast('Habit added! Knitted scarf updated');
                       }}
                       className="flex items-center gap-2"
@@ -364,8 +363,7 @@ export const DeskModuleRoom: React.FC<DeskModuleRoomProps> = ({
                     <ul className="space-y-2">
                       {habits.map((habit) => {
                         const isCheckedToday =
-                          habit.completedDates?.includes(todayIso) ||
-                          (habit as any).lastCompletedDate === todayIso;
+                          habit.completionHistory?.[todayIso] === 'completed';
 
                         return (
                           <li
@@ -377,9 +375,10 @@ export const DeskModuleRoom: React.FC<DeskModuleRoomProps> = ({
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                               <button
                                 onClick={() => {
-                                  toggleHabitCheckIn(habit.id, todayIso);
-                                  addXP(5, 'Habit check-in');
-                                  onToast('Stitch knitted! +5 XP');
+                                  if (!isCheckedToday) {
+                                    logHabitCompletion(habit.id, todayIso);
+                                    onToast('Stitch knitted! +60 XP');
+                                  }
                                 }}
                                 className={`w-6 h-6 border-2 border-[#222] rounded flex items-center justify-center font-bold text-sm cursor-pointer shrink-0 ${
                                   isCheckedToday ? 'bg-[#8fcf9f]' : 'bg-white hover:bg-[#f7d55c]'
@@ -389,7 +388,7 @@ export const DeskModuleRoom: React.FC<DeskModuleRoomProps> = ({
                               </button>
                               <span className="text-lg font-bold truncate">{habit.title}</span>
                               <span className="text-xs font-mono bg-white border border-[#222] px-2 py-0.5 rounded">
-                                {habit.streak || 0} DAY STREAK
+                                {habit.currentStreak || 0} DAY STREAK
                               </span>
                             </div>
                           </li>
@@ -451,7 +450,7 @@ export const DeskModuleRoom: React.FC<DeskModuleRoomProps> = ({
                           onClick={() => {
                             const newProgress = Math.min(100, (proj.progress || 0) + 10);
                             updateProject(proj.id, { progress: newProgress });
-                            addXP(5, 'Advanced project milestone');
+                            awardXP(5);
                             onToast('Project advanced! +5 XP');
                           }}
                           className="desk-rivet yellow text-xs py-1 px-2.5 cursor-pointer"
@@ -546,7 +545,7 @@ export const DeskModuleRoom: React.FC<DeskModuleRoomProps> = ({
                         onClick={() => {
                           const newProgress = Math.min(100, (goal.progress || 0) + 10);
                           updateGoal(goal.id, { progress: newProgress });
-                          addXP(10, 'Advanced goal progress');
+                          awardXP(10);
                           onToast('Goal advanced! +10 XP');
                         }}
                         className="desk-rivet yellow text-xs py-1 px-2.5 cursor-pointer"

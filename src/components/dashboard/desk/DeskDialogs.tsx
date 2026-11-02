@@ -36,7 +36,7 @@ export const DeskDialogs: React.FC<DeskDialogsProps> = ({
     habits,
     addHabit,
     profile,
-    addXP,
+    awardXP,
   } = useMomentumStore();
 
   const displayName = getUserDisplayName(currentUser?.name || profile.name);
@@ -241,9 +241,8 @@ export const DeskDialogs: React.FC<DeskDialogsProps> = ({
                   frequency: 'daily',
                   targetDaysPerWeek: 7,
                   category: habitArea,
-                  completedDates: [],
                 });
-                addXP(10, 'Created new habit');
+                awardXP(10);
                 onToast('New habit yarn spool added!');
                 onClose();
               }}
@@ -365,7 +364,7 @@ export const DeskDialogs: React.FC<DeskDialogsProps> = ({
                   onClick={() => {
                     if (dialog.payload?.id) {
                       resolveRisk(dialog.payload.id);
-                      addXP(20, 'Resolved deadline risk');
+                      awardXP(20);
                       onToast('Risk resolved! +20 XP');
                       onClose();
                     }
@@ -393,7 +392,7 @@ export const DeskDialogs: React.FC<DeskDialogsProps> = ({
                   onClick={() => {
                     if (dialog.payload?.id) {
                       updateTask(dialog.payload.id, { status: 'completed' });
-                      addXP(10, 'Completed pinned task');
+                      awardXP(10);
                       onToast('Task completed! +10 XP');
                       onClose();
                     }
